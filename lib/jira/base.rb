@@ -242,17 +242,25 @@ module JIRA
     #                     # Specify deeply nested JSON
     #                     has_many :children, :nested_under => ['foo', 'bar', 'baz']
     #                       # => Looks for {"foo":{"bar":{"baz":{"children":{}}}}}
+    # [:collection_method]  In some cases, special handling must be used to collect the resources.
+    #                       This symbol corresponds to a method that will be called and is expected
+    #                       to return an array of the resources.
+    #
     def self.has_many(collection, options = {})
       attribute_key = options[:attribute_key] || collection.to_s
       child_class = options[:class] || ('JIRA::Resource::' + collection.to_s.classify).constantize
       self_class_basename = self.name.split('::').last.downcase.to_sym
       define_method(collection) do
-        child_class_options = {self_class_basename => self}
-        attribute = maybe_nested_attribute(attribute_key, options[:nested_under]) || []
-        collection = attribute.map do |child_attributes|
-          child_class.new(client, child_class_options.merge(:attrs => child_attributes))
+        objs = if options[:collection_method]
+          send(options[:collection_method])
+        else
+          child_class_options = {self_class_basename => self}
+          attribute = maybe_nested_attribute(attribute_key, options[:nested_under]) || []
+          attribute.map do |child_attributes|
+            child_class.new(client, child_class_options.merge(:attrs => child_attributes))
+          end
         end
-        HasManyProxy.new(self, child_class, collection)
+        HasManyProxy.new(self, child_class, objs)
       end
     end
 
@@ -329,7 +337,7 @@ module JIRA
     end
 
     # Fetches the attributes for the specified resource from JIRA unless
-    # the resource is already expanded and the optional force reload flag 
+    # the resource is already expanded and the optional force reload flag
     # is not set
     def fetch(reload = false)
       return if expanded? && !reload
