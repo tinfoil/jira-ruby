@@ -22,6 +22,7 @@ require 'jira/resource/status'
 require 'jira/resource/comment'
 require 'jira/resource/worklog'
 require 'jira/resource/issue'
+require 'jira/resource/transition'
 
 require 'jira/request_client'
 require 'jira/oauth_client'

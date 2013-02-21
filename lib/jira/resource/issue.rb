@@ -31,6 +31,8 @@ module JIRA
 
       has_many :worklogs, :nested_under => ['fields','worklog']
 
+      has_many :transitions, :collection_method => :transitions_collection
+
       def self.all(client)
         response = client.get(client.options[:rest_base_path] + "/search")
         json = parse_json(response.body)
@@ -61,6 +63,16 @@ module JIRA
           attrs['fields'][method_name.to_s]
         else
           super(method_name)
+        end
+      end
+
+      private
+      def transitions_collection
+        url = client.options[:rest_base_path] + "/issue/#{key_value}/transitions"
+        response = client.get(url)
+        json = self.class.parse_json(response.body)
+        json['transitions'].map do |transition|
+          client.Transition.build(transition.merge('issue' => self.attrs)) # Merge the issue in to provide a link because the REST API doesn't
         end
       end
     end

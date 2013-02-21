@@ -9,6 +9,7 @@ module JIRA
     class Priority < JIRA::Base; end
     class Project < JIRA::Base; end
     class Status < JIRA::Base; end
+    class Transition < JIRA::Base; end
     class User < JIRA::Base; end
     class Version < JIRA::Base; end
     class Worklog < JIRA::Base; end

@@ -76,6 +76,10 @@ describe JIRA::Resource::Issue do
       subject.should have_many(:versions, JIRA::Resource::Version)
       subject.attachments.length.should == 2
 
+      subject.should_receive(:transitions_collection).any_number_of_times.and_return([mock('transition1', :class => JIRA::Resource::Transition), mock('transition2', :class => JIRA::Resource::Transition)])
+      subject.should have_many(:transitions, JIRA::Resource::Transition)
+      subject.transitions.length.should == 2
+
       subject.should have_many(:worklogs, JIRA::Resource::Worklog)
       subject.worklogs.length.should == 2
     end

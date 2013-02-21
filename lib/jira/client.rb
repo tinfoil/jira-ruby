@@ -5,7 +5,7 @@ module JIRA
 
   # This class is the main access point for all JIRA::Resource instances.
   #
-  # The client must be initialized with an options hash containing 
+  # The client must be initialized with an options hash containing
   # configuration options.  The available options are:
   #
   #   :site               => 'http://localhost:2990',
@@ -26,7 +26,7 @@ module JIRA
   #
   # See the JIRA::Base class methods for all of the available methods on these accessor
   # objects.
-  
+
   class Client
 
     extend Forwardable
@@ -109,6 +109,10 @@ module JIRA
 
     def Version # :nodoc:
       JIRA::Resource::VersionFactory.new(self)
+    end
+
+    def Transition # :nodoc:
+      JIRA::Resource::TransitionFactory.new(self)
     end
 
     # HTTP methods without a body
