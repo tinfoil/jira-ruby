@@ -69,9 +69,16 @@ module JIRA
 
     def initialize(client, options = {})
       @client   = client
-      @attrs    = options[:attrs] || {}
-      @expanded = options[:expanded] || false
-      @deleted  = false
+      @attrs = options.delete(:attrs) || {}
+
+      options.each do |key, value|
+        if respond_to?("#{key}=")
+          self.send("#{key}=", value)
+        end
+      end
+
+      @expanded ||= false
+      @deleted  ||= false
 
       # If this class has any belongs_to relationships, a value for
       # each of them must be passed in to the initializer.
@@ -198,6 +205,9 @@ module JIRA
         attribute = maybe_nested_attribute(attribute_key, options[:nested_under])
         return nil unless attribute
         child_class.new(client, :attrs => attribute)
+      end
+      define_method("#{resource}=") do |new_value|
+        return self.send(:maybe_nested_attribute=, attribute_key, new_value, options[:nested_under])
       end
     end
 
@@ -459,6 +469,10 @@ module JIRA
       self.class.maybe_nested_attribute(@attrs, attribute_name, nested_under)
     end
 
+    def maybe_nested_attribute=(attribute_name, new_value, nested_under = nil)
+      self.class.send(:maybe_nested_attribute=, @attrs, attribute_name, new_value, nested_under)
+    end
+
     def self.maybe_nested_attribute(attributes, attribute_name, nested_under = nil)
       return attributes[attribute_name] if nested_under.nil?
       if nested_under.instance_of? Array
@@ -470,6 +484,19 @@ module JIRA
         final[attribute_name]
       else
         return attributes[nested_under][attribute_name]
+      end
+    end
+
+    def self.maybe_nested_attribute=(attributes, attribute_name, new_value, nested_under = nil)
+      return attributes[attribute_name] = new_value if nested_under.nil?
+      if nested_under.instance_of? Array
+        final = nested_under.inject(attributes) do |parent, key|
+          parent[key] = {}
+        end
+        final[attribute_name] = new_value
+      else
+        attributes[nested_under] ||= {}
+        return attributes[nested_under][attribute_name] = new_value
       end
     end
 

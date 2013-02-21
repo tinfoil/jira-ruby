@@ -34,6 +34,8 @@ describe JIRA::Resource::Project do
         issues.each do |issue|
           issue.class.should == JIRA::Resource::Issue
           issue.expanded?.should be_false
+          issue.project.should_not be_nil
+          issue.project.key.should == subject.key
         end
 
       end

@@ -63,7 +63,6 @@ module JIRA
           super(method_name)
         end
       end
-
     end
 
   end

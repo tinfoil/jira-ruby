@@ -499,8 +499,20 @@ describe JIRA::Base do
       subject.muffin.id.should == '123'
     end
 
+    it "allows an attribute to be set in constructor" do
+      subject = JIRA::Resource::HasOneExample.new(client, :muffin => {'id' => '123'})
+      subject.muffin.class.should == JIRA::Resource::Deadbeef
+      subject.muffin.id.should == '123'
+    end
+
     it "allows the has_one attributes to be nested inside another attribute" do
       subject = JIRA::Resource::HasOneExample.new(client, :attrs => {'nested' => {'brunchmuffin' => {'id' => '123'}}})
+      subject.brunchmuffin.class.should == JIRA::Resource::Deadbeef
+      subject.brunchmuffin.id.should == '123'
+    end
+
+    it "allows attributes that are nested inside another attribute to be set" do
+      subject = JIRA::Resource::HasOneExample.new(client, :brunchmuffin => {'id' => '123'})
       subject.brunchmuffin.class.should == JIRA::Resource::Deadbeef
       subject.brunchmuffin.id.should == '123'
     end
@@ -509,6 +521,12 @@ describe JIRA::Base do
       subject = JIRA::Resource::HasOneExample.new(client, :attrs => {'nested' => {
         'breakfastscone' => { 'breakfastscone' => {'id' => '123'} }
       }})
+      subject.breakfastscone.class.should == JIRA::Resource::Deadbeef
+      subject.breakfastscone.id.should == '123'
+    end
+
+    it "allows deeply nested attributes to be set" do
+      subject = JIRA::Resource::HasOneExample.new(client, 'breakfastscone' => {'id' => '123'} )
       subject.breakfastscone.class.should == JIRA::Resource::Deadbeef
       subject.breakfastscone.id.should == '123'
     end
